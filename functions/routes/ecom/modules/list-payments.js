@@ -118,11 +118,9 @@ exports.post = ({ appSdk }, req, res) => {
         if (!gateway.icon) {
           gateway.icon = `${baseUri}/credit-card.png`
         }
-        // https://github.com/pagarme/pagarme-js
         gateway.js_client = {
-          script_uri: 'https://assets.pagar.me/pagarme-js/4.8/pagarme.min.js',
           onload_expression: `window._appmaxKey="${config.public_key}";` +
-            fs.readFileSync(path.join(__dirname, '../../../public/onload-expression.min.js'), 'utf8'),
+            fs.readFileSync(path.join(__dirname, '../../../public/onload-expression.js'), 'utf8'),
           cc_hash: {
             function: '_appmaxHash',
             is_promise: true
