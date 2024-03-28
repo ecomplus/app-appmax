@@ -47,12 +47,13 @@ exports.post = async ({ appSdk }, req, res) => {
     baseUri = 'https://homolog.sandboxappmax.com.br/api/v3/payment/pix'
     const pixConfig = config.account_deposit
     const dueTime = pixConfig.due_time || 60
-    const date = new Date()
-    date.setTime(date.getTime() + dueTime * 60000)
+    const currentDate = new Date()
+    const timeZoneOffset = currentDate.getTimezoneOffset()
+    const date = new Date(currentDate.getTime() + (dueTime * 60000) - (timeZoneOffset * 60000))
     appmaxTransaction.payment = {
       "pix": {
-        "document_number":buyer.doc_number,
-        "expiration_date": date.toISOString(),
+        "document_number": buyer.doc_number,
+        "expiration_date": date.toISOString().slice(0, 19).replace('T', ' '),
       }
     }
   } else {
