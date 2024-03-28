@@ -5,7 +5,7 @@ const createInstallments = async (config, token) => {
 }
 
   const { data } = await axios({
-    url: 'https://appmax.com.br/api/v3/payment/installments',
+    url: 'https://admin.appmax.com.br/api/v3/payment/installments',
     method: 'post',
     data: body
   })

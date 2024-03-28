@@ -23,7 +23,7 @@ const createOrder = async (items, amount, customer_id, token) => {
 }
 
   const { data } = await axios({
-    url: 'https://appmax.com.br/api/v3/order',
+    url: 'https://admin.appmax.com.br/api/v3/order',
     method: 'post',
     data: body
   })

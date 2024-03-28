@@ -38,7 +38,7 @@ const createOrUpdateCustomer = async (buyer, to, items, browser_ip, utm, token) 
   }
 
   const { data } = await axios({
-    url: 'https://appmax.com.br/api/v3/customer',
+    url: 'https://admin.appmax.com.br/api/v3/customer',
     method: 'post',
     data: body
   })
