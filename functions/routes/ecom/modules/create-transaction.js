@@ -1,8 +1,8 @@
 const axios = require('axios')
-const addInstallments = require('../../../lib/payments/add-installments')
 const parseStatus = require('../../../lib/payments/parse-status')
 const getCustomer = require('../../../lib/appmax/customer')
 const createOrder = require('../../../lib/appmax/order')
+const addInstallments = require('../../../lib/payments/add-installments')
 
 exports.post = async ({ appSdk }, req, res) => {
   // https://apx-mods.e-com.plus/api/v1/create_transaction/schema.json?store_id=100
@@ -35,6 +35,20 @@ exports.post = async ({ appSdk }, req, res) => {
 
   if (params.payment_method.code === 'credit_card') {
     let installmentsNumber = params.installments_number
+    if (installmentsNumber > 1) {
+      if (config.installments) {
+        // list all installment options
+        const { gateway } = addInstallments(amount.total, config.installments)
+        const installmentOption = gateway.installment_options &&
+          gateway.installment_options.find(({ number }) => number === installmentsNumber)
+        if (installmentOption) {
+          transaction.installments = installmentOption
+          transaction.installments.total = installmentOption.number * installmentOption.value
+        } else {
+          installmentsNumber = 1
+        }
+      }
+    }
     appmaxTransaction.payment = {
       "CreditCard": {
         "token": params.credit_card && params.credit_card.hash,
@@ -121,15 +135,14 @@ exports.post = async ({ appSdk }, req, res) => {
             if (data.due_date) {
               transaction.banking_billet.valid_thru = new Date(data.due_date).toISOString()
             }
-          } else if (data.card) {
+          } else if (data.upsell_hash) {
             transaction.credit_card = {
-              holder_name: data.card.holder_name,
-              last_digits: data.card.last_digits,
-              company: data.card.brand,
-              token: data.card.fingerprint
+              holder_name: params.credit_card && params.credit_card.name,
+              last_digits: params.credit_card && params.credit_card.number && params.credit_card.number.slice(-4),
+              token: params.credit_card && params.credit_card.hash
             }
           } else if (paymentMethod === 'account_deposit') {
-            const qrCode = data.pix_qr_code
+            const qrCode = data.pix_qrcode
             transaction.intermediator.transaction_code = qrCode
             const qrCodeSrc = `https://gerarqrcodepix.com.br/api/v1?brcode=${qrCode}&tamanho=256`
             transaction.notes = `<img src="${qrCodeSrc}" style="display:block;margin:0 auto">`
