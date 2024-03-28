@@ -6,7 +6,7 @@ const addInstallments = require('../../../lib/payments/add-installments')
 
 exports.post = async ({ appSdk }, req, res) => {
   // https://apx-mods.e-com.plus/api/v1/create_transaction/schema.json?store_id=100
-  let baseUri = 'https://homolog.sandboxappmax.com.br/api/v3/payment/credit-card'
+  let baseUri = 'https://appmax.com.br/api/v3/payment/credit-card'
   const { params, application } = req.body
   const { storeId } = req
   const config = Object.assign({}, application.data, application.hidden_data)
@@ -58,7 +58,7 @@ exports.post = async ({ appSdk }, req, res) => {
       }
     }
   } else if (params.payment_method.code === 'account_deposit') {
-    baseUri = 'https://homolog.sandboxappmax.com.br/api/v3/payment/pix'
+    baseUri = 'https://appmax.com.br/api/v3/payment/pix'
     const pixConfig = config.account_deposit
     const dueTime = pixConfig.due_time || 60
     const currentDate = new Date()
@@ -72,7 +72,7 @@ exports.post = async ({ appSdk }, req, res) => {
     }
   } else {
     // banking billet
-    baseUri = 'https://homolog.sandboxappmax.com.br/api/v3/payment/boleto'
+    baseUri = 'https://appmax.com.br/api/v3/payment/boleto'
     transaction.banking_billet = {}
     appmaxTransaction.payment = {
       "Boleto": {
