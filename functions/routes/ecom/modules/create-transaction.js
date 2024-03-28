@@ -12,7 +12,7 @@ exports.post = async ({ appSdk }, req, res) => {
   const config = Object.assign({}, application.data, application.hidden_data)
   const { token } = config
   const orderId = params.order_id
-  const { amount, buyer, to, items, browser_ip } = params
+  const { amount, buyer, to, items, browser_ip, utm } = params
   console.log('> Transaction #', storeId, orderId)
   const quantityItems = items.reduce((previous, currentValue) => previous + currentValue.quantity, 0)
   const customerId = await getCustomer(buyer, to, items, browser_ip, utm, token)
