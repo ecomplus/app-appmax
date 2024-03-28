@@ -18,5 +18,5 @@ module.exports = appmaxStatus => {
     case 'pending_review':
       return 'authorized'
   }
-  return 'unknown'
+  return 'pending'
 }

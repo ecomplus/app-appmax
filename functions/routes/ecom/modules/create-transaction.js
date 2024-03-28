@@ -85,68 +85,66 @@ exports.post = async ({ appSdk }, req, res) => {
       method: 'post',
       data: appmaxTransaction
     })
-      .then(({ data }) => {
-        console.log('result payment', JSON.stringify(data))
-        if (data.authorized_amount) {
-          transaction.amount = data.authorized_amount / 100
-        } else if (data.amount) {
-          transaction.amount = data.amount / 100
-        }
-        const paymentMethod = data.payment_method === 'pix'
-          ? 'account_deposit'
-          : data.payment_method
-        transaction.intermediator = {
-          payment_method: {
-            code: paymentMethod || params.payment_method.code
-          }
-        }
-        ;[
-          ['id', 'transaction_id'],
-          ['tid', 'transaction_code'],
-          ['reference_key', 'transaction_reference']
-        ].forEach(([dataField, transactionField]) => {
-          if (data[dataField]) {
-            transaction.intermediator[transactionField] = String(data[dataField])
-          }
-        })
-        if (data.customer && data.customer.id) {
-          transaction.intermediator.buyer_id = String(data.customer.id)
-        }
-  
-        if (transaction.banking_billet) {
-          if (data.boleto_barcode) {
-            transaction.banking_billet.code = data.boleto_barcode
-          }
-          if (data.boleto_url) {
-            transaction.payment_link = transaction.banking_billet.link = data.boleto_url
-          }
-          if (data.boleto_expiration_date) {
-            transaction.banking_billet.valid_thru = new Date(data.boleto_expiration_date).toISOString()
-          }
-        } else if (data.card) {
-          transaction.credit_card = {
-            holder_name: data.card.holder_name,
-            last_digits: data.card.last_digits,
-            company: data.card.brand,
-            token: data.card.fingerprint
-          }
-        } else if (paymentMethod === 'account_deposit') {
-          const qrCode = data.pix_qr_code
-          transaction.intermediator.transaction_code = qrCode
-          const qrCodeSrc = `https://gerarqrcodepix.com.br/api/v1?brcode=${qrCode}&tamanho=256`
-          transaction.notes = `<img src="${qrCodeSrc}" style="display:block;margin:0 auto">`
-          if (data.pix_expiration_date) {
-            transaction.account_deposit = {
-              valid_thru: new Date(data.pix_expiration_date).toISOString()
+      .then((response) => {
+        console.log('result payment', JSON.stringify(response.data))
+        const data = response && response.data && response.data.data
+        if (data && response.data.status === 200) {
+          const paymentMethod =  data.type === 'Boleto'
+            ? 'banking_billet'
+            : data.type === 'CreditCard'
+              ? 'credit_card'
+              : 'account_deposit'
+          
+          transaction.intermediator = {
+            payment_method: {
+              code: paymentMethod || params.payment_method.code
             }
           }
+
+          ;[
+            ['pay_reference', 'transaction_code'],
+            ['pay_reference', 'transaction_reference']
+          ].forEach(([dataField, transactionField]) => {
+            if (data[dataField]) {
+              transaction.intermediator[transactionField] = String(data[dataField])
+            }
+          })
+          transaction.intermediator['transaction_id'] = String(orderAppmaxId)
+          transaction.intermediator.buyer_id = String(customerId)
+          if (transaction.banking_billet) {
+            if (data.boleto_payment_code) {
+              transaction.banking_billet.code = data.boleto_payment_code
+            }
+            if (data.pdf) {
+              transaction.payment_link = transaction.banking_billet.link = data.pdf
+            }
+            if (data.due_date) {
+              transaction.banking_billet.valid_thru = new Date(data.due_date).toISOString()
+            }
+          } else if (data.card) {
+            transaction.credit_card = {
+              holder_name: data.card.holder_name,
+              last_digits: data.card.last_digits,
+              company: data.card.brand,
+              token: data.card.fingerprint
+            }
+          } else if (paymentMethod === 'account_deposit') {
+            const qrCode = data.pix_qr_code
+            transaction.intermediator.transaction_code = qrCode
+            const qrCodeSrc = `https://gerarqrcodepix.com.br/api/v1?brcode=${qrCode}&tamanho=256`
+            transaction.notes = `<img src="${qrCodeSrc}" style="display:block;margin:0 auto">`
+            if (data.pix_expiration_date) {
+              transaction.account_deposit = {
+                valid_thru: new Date(data.pix_expiration_date).toISOString()
+              }
+            }
+          }
+          transaction.status = {
+            updated_at: data.date_created || data.date_updated || new Date().toISOString(),
+            current: parseStatus(data.status)
+          }
+          res.send({ transaction })
         }
-  
-        transaction.status = {
-          updated_at: data.date_created || data.date_updated || new Date().toISOString(),
-          current: parseStatus(data.status)
-        }
-        res.send({ transaction })
       })
   
       .catch(error => {
