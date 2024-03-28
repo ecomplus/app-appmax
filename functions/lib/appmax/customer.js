@@ -44,8 +44,8 @@ const createOrUpdateCustomer = async (buyer, to, items, browser_ip, utm, token) 
   })
   console.log('created customer', JSON.stringify(data))
 
-  if (data) {
-    return data.customer_id
+  if (data && data.status === 200) {
+    return data.data && data.data.id
   }
   return null
 }
