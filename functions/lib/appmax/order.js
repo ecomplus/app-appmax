@@ -29,8 +29,8 @@ const createOrder = async (items, amount, customer_id, token) => {
   })
   console.log('created order', JSON.stringify(data))
 
-  if (data) {
-    return data.order_id
+  if (data && data.status === 200) {
+    return data.data && data.data.id
   }
   return null
 }
