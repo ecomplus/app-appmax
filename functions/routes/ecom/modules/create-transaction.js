@@ -53,7 +53,9 @@ exports.post = async ({ appSdk }, req, res) => {
     appmaxTransaction.payment = {
       "CreditCard": {
         "token": params.credit_card && params.credit_card.hash,
-        "document_number": buyer.doc_number,
+        "document_number": buyer.doc_number.length > 11 
+          ? buyer.doc_number.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5')
+          : buyer.doc_number.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4'),
         "installments": installmentsNumber,
         "soft_descriptor": config.soft_descriptor || (`${params.domain}_APPMAX`).substr(0, 13)
       }
