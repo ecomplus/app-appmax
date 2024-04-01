@@ -49,6 +49,7 @@ exports.post = async ({ appSdk }, req, res) => {
         }
       }
     }
+    console.log('data payment', JSON.stringify(params.credit_card))
     appmaxTransaction.payment = {
       "CreditCard": {
         "token": params.credit_card && params.credit_card.hash,
@@ -92,7 +93,6 @@ exports.post = async ({ appSdk }, req, res) => {
     }
   }
 
-  // https://docs.pagar.me/reference#criar-transacao
   if (quantityItems > 0) {
     axios({
       url: baseUri,

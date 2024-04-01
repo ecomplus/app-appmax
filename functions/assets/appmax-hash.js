@@ -16,7 +16,7 @@
         } 
       })
         .then(function (response) {
-          resolve(response.data.data.data)
+          resolve(response.data.data.data.token)
         })
         .catch(reject)
     })
