@@ -16,7 +16,7 @@
         } 
       })
         .then(function ({ data }) {
-          resolve(data.data.hash)
+          resolve(data.data)
         })
         .catch(reject)
     })
