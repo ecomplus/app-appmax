@@ -16,7 +16,7 @@ const createInstallments = async (total, config, token) => {
   console.log('get installments', JSON.stringify(data))
 
   if (data && data.status === 200) {
-    return data.data && data.data.id
+    return data.data
   }
   return null
 }
