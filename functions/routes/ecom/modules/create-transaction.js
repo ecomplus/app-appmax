@@ -145,7 +145,7 @@ exports.post = async ({ appSdk }, req, res) => {
               token: params.credit_card && params.credit_card.hash
             }
           } else if (paymentMethod === 'account_deposit') {
-            const qrCode = data.pix_qrcode
+            const qrCode = data.pix_emv
             transaction.intermediator.transaction_code = qrCode
             const qrCodeSrc = `https://gerarqrcodepix.com.br/api/v1?brcode=${qrCode}&tamanho=256`
             transaction.notes = `<img src="${qrCodeSrc}" style="display:block;margin:0 auto">`
