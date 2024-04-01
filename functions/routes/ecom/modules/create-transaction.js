@@ -183,7 +183,6 @@ exports.post = async ({ appSdk }, req, res) => {
             message = data.errors[0].message
           }
         }
-        console.error(err)
         res.status(409)
         res.send({
           error: errCode,
