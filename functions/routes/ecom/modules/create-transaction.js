@@ -163,7 +163,7 @@ exports.post = async ({ appSdk }, req, res) => {
       })
   
       .catch(error => {
-        console.log(error)
+        console.log(error.response)
         // try to debug request error
         const errCode = 'APPMAX_TRANSACTION_ERR'
         let { message } = error
