@@ -15,8 +15,8 @@
           }
         } 
       })
-        .then(function (response) {
-          resolve(response.data.data.data.token)
+        .then(function ({ data }) {
+          resolve(data.data.token)
         })
         .catch(reject)
     })
