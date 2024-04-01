@@ -1,7 +1,11 @@
 const axios = require('axios')
 
-const createInstallments = async (config, token) => {
+const createInstallments = async (total, config, token) => {
   const body = {
+    "access-token": token,
+    installments: config.installments,
+    total,
+    format: 2
 }
 
   const { data } = await axios({
@@ -9,7 +13,7 @@ const createInstallments = async (config, token) => {
     method: 'post',
     data: body
   })
-  console.log('created installments', JSON.stringify(data))
+  console.log('get installments', JSON.stringify(data))
 
   if (data && data.status === 200) {
     return data.data && data.data.id
