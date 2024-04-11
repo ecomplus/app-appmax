@@ -7,8 +7,8 @@ module.exports = appmaxStatus => {
       return 'pending'
     case 'pending_refund':
       return 'in_dispute'
-    case 'refused':
-      return 'unauthorized'
+    case 'cancelado':
+      return 'voided'
     case 'aprovado':
       return 'paid'
     case 'autorizado':
