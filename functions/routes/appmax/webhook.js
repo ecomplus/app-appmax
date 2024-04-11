@@ -30,15 +30,18 @@ exports.post = ({ appSdk }, req, res) => {
         .then(async (auth) => {
           // validate Appmax postback
           try {
+            console.log('feito login')
             const appData = await getAppData({ appSdk, storeId, auth })
-            const { id, status } = appmaxTransaction.data
+            const { id } = appmaxTransaction.data
             return axios.get(`https://admin.appmax.com.br/api/v3/order/${id}`, {
                 'access-token': appData.token
               }, {
                 maxRedirects: 0,
                 validateStatus
               }).then(async ({ data }) => {
+                console.log('order', JSON.stringify(data))
                 const status = data && data.data && data.data.status
+                console.log('status', status)
                 const orderRequest = await findOrderByTransactionId(appSdk, storeId, auth, id)
                 if (orderRequest && Array.isArray(orderRequest.result) && orderRequest.result.length) {
                   const order = orderRequest.result[0]
