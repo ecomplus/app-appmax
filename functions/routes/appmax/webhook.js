@@ -46,13 +46,22 @@ exports.post = ({ appSdk }, req, res) => {
                     return intermediator && intermediator.transaction_id === id
                   })
                   if (transaction && transaction._id) {
+                    const eventTreatement = appmaxTransaction.event === 'OrderChargeBackInTreatment' 
+                      ? 'in_dispute'
+                      : appmaxTransaction.event === 'OrderBilletOverdue'
+                        ? 'voided'
+                        : appmaxTransaction.event === 'OrderPixExpired'
+                          ? 'voided'
+                          : undefined
+
+
                     await appSdk.apiRequest(
                       storeId,
                       `orders/${order._id}/payments_history.json`,
                       'POST',
                       {
                         date_time: new Date().toISOString(),
-                        status: parseStatus(status),
+                        status: eventTreatement || parseStatus(status),
                         transaction_id: transaction._id,
                         flags: ['APPMAX, MGNR']
                       },
