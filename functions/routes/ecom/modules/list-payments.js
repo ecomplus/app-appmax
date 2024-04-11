@@ -1,6 +1,4 @@
 const { baseUri } = require('../../../__env')
-const path = require('path')
-const fs = require('fs')
 const addInstallments = require('../../../lib/payments/add-installments')
 
 exports.post = ({ appSdk }, req, res) => {
