@@ -22,24 +22,22 @@ exports.post = ({ appSdk }, req, res) => {
   console.log('>>Webhook Pagaleve: ')
   const { body, query } = req
   // https://docs.pagar.me/docs/gerenciando-postbacks
-  const { storeId } = query
+  const storeId = Number(query.storeId)
   console.log('> Postback #', storeId, JSON.stringify(body))
   const appmaxTransaction = body
-  console.log('check', appmaxTransaction && appmaxTransaction.data && appmaxTransaction.event)
   if (appmaxTransaction && appmaxTransaction.data && appmaxTransaction.event) {
-    if (Number(storeId) > 100) {
-      console.log('entrei com store id', storeId, typeof storeId)
-      return appSdk.getAuth(Number(storeId))
+    if (storeId > 100) {
+      return appSdk.getAuth(storeId)
         .then(async (auth) => {
           try {
-              console.log('feito login')
               const appData = await getAppData({ appSdk, storeId, auth })
               const { id } = appmaxTransaction.data
               return axios.get(`https://admin.appmax.com.br/api/v3/order/${id}`, {
-                  'access-token': appData.token
+                  params: {
+                    'access-token': appData.token
+                  }
                 }, {
-                  maxRedirects: 0,
-                  validateStatus
+                  maxRedirects: 0
                 }).then(async ({ data }) => {
                   console.log('order', JSON.stringify(data))
                   const status = data && data.data && data.data.status
@@ -75,6 +73,8 @@ exports.post = ({ appSdk }, req, res) => {
                       res.status(200)
                     }
                   }
+                }).catch(err => {
+                  console.log('couldnt get status', err)
                 })
           } catch (error) {
               console.log('erro no update', error)
