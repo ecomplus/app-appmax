@@ -114,9 +114,6 @@ exports.post = ({ appSdk }, req, res) => {
       }
 
       if (isCreditCard) {
-        if (!gateway.icon) {
-          gateway.icon = `${baseUri}/credit-card.png`
-        }
         gateway.js_client = {
           script_uri: `${baseUri}/dist/appmax-hash.min.js`,
           onload_expression: `window._appmaxKey="${config.public_key}";`,
