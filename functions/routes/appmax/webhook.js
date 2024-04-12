@@ -24,9 +24,10 @@ exports.post = ({ appSdk }, req, res) => {
   // https://docs.pagar.me/docs/gerenciando-postbacks
   const { storeId } = query
   console.log('> Postback #', storeId, JSON.stringify(body))
-  const appmaxTransaction = req.body
+  const appmaxTransaction = body
+  console.log('check', appmaxTransaction && appmaxTransaction.data && appmaxTransaction.event)
   if (appmaxTransaction && appmaxTransaction.data && appmaxTransaction.event) {
-    if (storeId > 100) {
+    if (Number(storeId) > 100) {
       console.log('entrei com store id', storeId, typeof storeId)
       return appSdk.getAuth(storeId)
         .then(async (auth) => {
