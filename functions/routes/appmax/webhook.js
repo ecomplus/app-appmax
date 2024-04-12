@@ -4,7 +4,7 @@ const axios = require('axios')
 
 const findOrderByTransactionId = (appSdk, storeId, auth, transactionId) => {
   return new Promise((resolve, reject) => {
-    appSdk.apiRequest(storeId, `orders.json?transactions.intermediator.transaction_id=${transactionId}`, 'GET', null, auth)
+    appSdk.apiRequest(storeId, `orders.json?transactions.intermediator.transaction_id=${transactionId}&fields=transactions,number,_id`, 'GET', null, auth)
       .then(({ response }) => {
         resolve(response.data)
       })
@@ -46,8 +46,6 @@ exports.post = ({ appSdk }, req, res) => {
                   const orderRequest = await findOrderByTransactionId(appSdk, storeId, auth, id)
                   if (orderRequest && Array.isArray(orderRequest.result) && orderRequest.result.length) {
                     const order = orderRequest.result[0]
-                    console.log('order ecom', JSON.stringify(order))
-                    console.log('order ecom', JSON.stringify(orderRequest))
                     const transaction = order.transactions.find(({ intermediator }) => {
                       return intermediator && intermediator.transaction_id === id
                     })
