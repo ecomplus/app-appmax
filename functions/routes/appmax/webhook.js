@@ -57,7 +57,7 @@ exports.post = ({ appSdk }, req, res) => {
                             : undefined
 
 
-                      await appSdk.apiRequest(
+                      return appSdk.apiRequest(
                         storeId,
                         `orders/${order._id}/payments_history.json`,
                         'POST',
@@ -69,7 +69,7 @@ exports.post = ({ appSdk }, req, res) => {
                         },
                         auth
                       ).then(response => {
-                        console.log('update with success')
+                        console.log('update with success order', order._id)
                         return res.status(200)
                       }).catch(error => {
                         console.log('erro de realizar update payment', error)
