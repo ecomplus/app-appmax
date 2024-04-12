@@ -39,15 +39,13 @@ exports.post = ({ appSdk }, req, res) => {
                   maxRedirects: 0,
                   validateStatus
                 }).then(async ({ data }) => {
-                  console.log('order', JSON.stringify(data))
                   const status = data && data.data && data.data.status
                   console.log('status', status)
                   const orderRequest = await findOrderByTransactionId(appSdk, storeId, auth, id)
                   if (orderRequest && Array.isArray(orderRequest.result) && orderRequest.result.length) {
                     const order = orderRequest.result[0]
-                    console.log('order ecom', JSON.stringify(order))
                     const transaction = order.transactions.find(({ intermediator }) => {
-                      return intermediator && intermediator.transaction_id === id
+                      return intermediator && intermediator.transaction_id === String(id)
                     })
                     if (transaction && transaction._id) {
                       const eventTreatement = appmaxTransaction.event === 'OrderChargeBackInTreatment' 
