@@ -42,7 +42,7 @@ exports.post = ({ appSdk, admin }, req, res) => {
             const order = await findOrderByTransactionId(appSdk, storeId, auth, id)
             if (order) {
               const transaction = order.transactions.find(({ intermediator }) => {
-                return intermediator && intermediator.transaction_id === id
+                return intermediator && intermediator.transaction_id === String(id)
               })
               if (transaction && transaction._id) {
                 // update payment
