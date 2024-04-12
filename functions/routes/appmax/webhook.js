@@ -33,11 +33,12 @@ exports.post = ({ appSdk }, req, res) => {
               const appData = await getAppData({ appSdk, storeId, auth })
               const { id } = appmaxTransaction.data
               return axios.get(`https://admin.appmax.com.br/api/v3/order/${id}`, {
-                  params: {
-                    'access-token': appData.token
-                  }
-                }, {
-                  maxRedirects: 0
+                params: {
+                  'access-token': appData.token
+                }
+              }, {
+                  maxRedirects: 0,
+                  validateStatus
                 }).then(async ({ data }) => {
                   console.log('order', JSON.stringify(data))
                   const status = data && data.data && data.data.status
@@ -45,6 +46,8 @@ exports.post = ({ appSdk }, req, res) => {
                   const orderRequest = await findOrderByTransactionId(appSdk, storeId, auth, id)
                   if (orderRequest && Array.isArray(orderRequest.result) && orderRequest.result.length) {
                     const order = orderRequest.result[0]
+                    console.log('order ecom', JSON.stringify(order))
+                    console.log('order ecom', JSON.stringify(orderRequest))
                     const transaction = order.transactions.find(({ intermediator }) => {
                       return intermediator && intermediator.transaction_id === id
                     })
