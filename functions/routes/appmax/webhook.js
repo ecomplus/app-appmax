@@ -29,7 +29,7 @@ exports.post = ({ appSdk }, req, res) => {
   if (appmaxTransaction && appmaxTransaction.data && appmaxTransaction.event) {
     if (Number(storeId) > 100) {
       console.log('entrei com store id', storeId, typeof storeId)
-      return appSdk.getAuth(storeId)
+      return appSdk.getAuth(Number(storeId))
         .then(async (auth) => {
           try {
               console.log('feito login')
