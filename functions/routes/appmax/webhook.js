@@ -79,7 +79,7 @@ exports.post = ({ appSdk }, req, res) => {
             res.status(400).send(error)
           }
         }).catch(err => {
-          console.log('not logged', error)
+          console.log('not logged', err)
         })
     }
   }
