@@ -78,6 +78,8 @@ exports.post = ({ appSdk }, req, res) => {
             console.log('erro no update', error)
             res.status(400).send(error)
           }
+        }).catch(err => {
+          console.log('not logged', error)
         })
     }
   }
