@@ -19,7 +19,6 @@ const validateStatus = function (status) {
 }
 
 exports.post = ({ appSdk }, req, res) => {
-  console.log('>>Webhook Pagaleve: ')
   const { body, query } = req
   // https://docs.pagar.me/docs/gerenciando-postbacks
   const storeId = Number(query.storeId)
@@ -46,6 +45,7 @@ exports.post = ({ appSdk }, req, res) => {
                   const orderRequest = await findOrderByTransactionId(appSdk, storeId, auth, id)
                   if (orderRequest && Array.isArray(orderRequest.result) && orderRequest.result.length) {
                     const order = orderRequest.result[0]
+                    console.log('order ecom', JSON.stringify(order))
                     const transaction = order.transactions.find(({ intermediator }) => {
                       return intermediator && intermediator.transaction_id === id
                     })
@@ -70,8 +70,12 @@ exports.post = ({ appSdk }, req, res) => {
                           flags: ['APPMAX, MGNR']
                         },
                         auth
-                      )
-                      res.status(200)
+                      ).then(response => {
+                        console.log('update with success')
+                        return res.status(200)
+                      }).catch(error => {
+                        console.log('erro de realizar update payment', error)
+                      })
                     }
                   }
                 }).catch(err => {
