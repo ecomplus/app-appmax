@@ -12,6 +12,7 @@ module.exports = appmaxStatus => {
     case 'cancelado':
       return 'voided'
     case 'aprovado':
+    case 'integrado':
       return 'paid'
     case 'autorizado':
       return 'authorized'
