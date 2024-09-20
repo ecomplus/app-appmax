@@ -1,4 +1,4 @@
-# AppMmx
+# AppMax
 
 ## A Melhor Tecnologia de Pagamentos para E-commerces e Negócios Digitais 
 
