@@ -13,7 +13,7 @@
             year: cardClient.year,
             cvv: cardClient.cvc
           }
-        } 
+        }
       })
         .then(function ({ data }) {
           resolve(data.data.token)

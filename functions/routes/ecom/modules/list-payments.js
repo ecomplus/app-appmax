@@ -7,7 +7,6 @@ exports.post = ({ appSdk }, req, res) => {
   const amount = params.amount || {}
   const initialTotalAmount = amount.total
 
-
   const config = Object.assign({}, application.data, application.hidden_data)
   if (!config.token || !config.public_key) {
     return res.status(409).send({

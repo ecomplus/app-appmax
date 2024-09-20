@@ -4,7 +4,13 @@ const axios = require('axios')
 
 const findOrderByTransactionId = (appSdk, storeId, auth, transactionId) => {
   return new Promise((resolve, reject) => {
-    appSdk.apiRequest(storeId, `orders.json?transactions.intermediator.transaction_id=${transactionId}&fields=transactions,number,_id`, 'GET', null, auth)
+    appSdk.apiRequest(
+      storeId,
+      `orders.json?transactions.intermediator.transaction_id=${transactionId}&fields=transactions,number,_id`,
+      'GET',
+      null,
+      auth
+    )
       .then(({ response }) => {
         resolve(response.data && response.data.result && response.data.result.length && response.data.result[0])
       })
@@ -22,24 +28,28 @@ exports.post = ({ appSdk, admin }, req, res) => {
   const { body, query } = req
   const storeId = Number(query.storeId)
   const appmaxTransaction = body
-  console.log('>> Store: ', storeId, ' body: ', JSON.stringify(appmaxTransaction), ' <<')
   if (storeId > 100) {
+    console.log(`>> Store: ${storeId} body: ${JSON.stringify(appmaxTransaction)} <<`)
     return appSdk.getAuth(storeId)
       .then(async (auth) => {
         try {
           const appData = await getAppData({ appSdk, storeId, auth })
           const { id } = appmaxTransaction.data
           return axios.get(`https://admin.appmax.com.br/api/v3/order/${id}`, {
-              params: {
-                'access-token': appData.token
-              }
-            }, {
-                maxRedirects: 0,
-                validateStatus
+            params: {
+              'access-token': appData.token
+            }
+          }, {
+            maxRedirects: 0,
+            validateStatus
           }).then(async ({ data }) => {
             const status = data && data.data && data.data.status
-            console.log('status', status)
+            console.log(`> Status: ${status} => ${parseStatus(status)}`)
             const order = await findOrderByTransactionId(appSdk, storeId, auth, id)
+              .catch((e) => {
+                console.error(e)
+                return null
+              })
             if (order) {
               const transaction = order.transactions.find(({ intermediator }) => {
                 return intermediator && intermediator.transaction_id === String(id)
@@ -47,38 +57,34 @@ exports.post = ({ appSdk, admin }, req, res) => {
               if (transaction && transaction._id) {
                 // update payment
                 const transactionId = transaction._id
-                const eventTreatement = appmaxTransaction.event === 'OrderChargeBackInTreatment' 
-                      ? 'in_dispute'
-                      : appmaxTransaction.event === 'OrderBilletOverdue'
-                        ? 'voided'
-                        : appmaxTransaction.event === 'OrderPixExpired'
-                          ? 'voided'
-                          : undefined
+
                 return appSdk.apiRequest(
                   storeId,
                   `orders/${order._id}/payments_history.json`,
                   'POST',
                   {
                     date_time: new Date().toISOString(),
-                    status: eventTreatement || parseStatus(status),
+                    status: parseStatus(status),
                     transaction_id: transactionId,
                     flags: ['APPMAX, MGNR']
                   },
                   auth
                 ).then(({ data }) => {
-                    console.log('>> Updated order <<', order._id)
-                    res.status(200).send('ok')
-                  })
-                  .catch(error => {console.log('erro na atualização', error)})
-                }
-            } else {
-                console.log('não encontrou pedido')
-                res.status(400).send({
-                  error: 'não encontrou o pedido'
+                  console.log(`>> Updated order ${order._id} <<`)
+                  return res.status(200).send('ok')
                 })
-            } 
+              } else {
+                return res.status(400).send({
+                  error: 'Transaction not found'
+                })
+              }
+            } else {
+              console.warn('Order not found')
+              return res.status(400).send({
+                error: 'Order not found'
+              })
+            }
           })
-          .catch(error => {console.log('erro pra buscar status', error); throw error})
         } catch (error) {
           console.error(error)
           const { response, config } = error
@@ -92,7 +98,7 @@ exports.post = ({ appSdk, admin }, req, res) => {
             console.error(err)
           }
           if (!res.headersSent) {
-            res.send({
+            return res.send({
               status: status || 500,
               msg: `#${storeId} APPMAX Webhook error`
             })
@@ -102,10 +108,11 @@ exports.post = ({ appSdk, admin }, req, res) => {
       .catch(() => {
         console.log('Unauthorized')
         if (!res.headersSent) {
-          res.sendStatus(401)
+          return res.sendStatus(401)
         }
       })
   } else {
+    console.log(`StoreId #${storeId} not found`)
     return res.send({
       status: 404,
       msg: `StoreId #${storeId} not found`
